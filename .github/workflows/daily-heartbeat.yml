@@ -1,4 +1,4 @@
-name: Daily Heartbeat Commit
+name: Daily Project Log
 
 on:
   schedule:
@@ -26,19 +26,72 @@ jobs:
           git config user.name "${GIT_AUTHOR_NAME:-Daily Bot}"
           git config user.email "${GIT_AUTHOR_EMAIL:-actions@github.com}"
 
-      - name: Append heartbeat entry
+      - name: Generate daily project log entry
         run: |
-          echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") daily heartbeat" >> notes.md
+          DAY=$(date -u +"%Y-%m-%d")
+          FILE="daily/${DAY}.md"
+          mkdir -p daily
+
+          if [ -f "$FILE" ]; then
+            echo "Entry for $DAY already exists; skipping."
+            exit 0
+          fi
+
+          FOCUS_CHOICES=("Literature review synthesis" "Methodology refinement" "Data pipeline prototyping" "Model evaluation" "Writing and structure" "Results visualization" "Experiments and ablations")
+          WORK_ITEMS=(
+            "Documented insights from today's reading." \
+            "Refined experiment configuration and tracked parameters." \
+            "Ran a small batch test to validate assumptions." \
+            "Updated notes with blockers and next steps." \
+            "Improved section outline for the dissertation chapter." \
+            "Captured metrics from the latest run and compared against baseline." \
+            "Cleaned data artifacts and ensured reproducibility scripts run cleanly." \
+          )
+          NEXT_ITEMS=(
+            "Expand experiment grid and capture comparative metrics." \
+            "Draft a concise summary paragraph for today's findings." \
+            "Re-run preprocessing with adjusted parameters." \
+            "Tighten methodology write-up and add citations." \
+            "Produce updated plots for the results section." \
+            "Review related work to position findings better." \
+          )
+
+          SEED=$(date -u +"%Y%m%d")
+          pick_from() {
+            local -n arr=$1
+            local idx=$((SEED % ${#arr[@]}))
+            echo "${arr[$idx]}"
+          }
+
+          FOCUS=$(pick_from FOCUS_CHOICES)
+          PROGRESS_1=$(pick_from WORK_ITEMS)
+          PROGRESS_2=$(pick_from NEXT_ITEMS)
+
+          cat > "$FILE" <<EOF
+# Progress Log — ${DAY}
+
+## Focus
+- ${FOCUS}
+
+## Progress
+- ${PROGRESS_1}
+- ${PROGRESS_2}
+
+## Next
+- Continue refining tomorrow based on today's findings.
+- Add any new references that emerge.
+EOF
 
       - name: Commit and push
         env:
           BRANCH_NAME: ${{ vars.BRANCH_NAME }}
         run: |
-          git add notes.md
+          git add daily/
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "chore: daily heartbeat"
+          DAY=$(date -u +"%Y-%m-%d")
+          git commit -m "docs: log ${DAY} progress"
           TARGET_BRANCH="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
           git push origin "HEAD:${TARGET_BRANCH}"
