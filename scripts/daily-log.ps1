@@ -11,7 +11,7 @@ $filePath = Join-Path $repoRoot "daily/${day}-${timestamp}.md"
 
 New-Item -ItemType Directory -Path (Split-Path $filePath -Parent) -Force | Out-Null
 
-$seed = [int]$utcNow.ToString('yyyyMMddHHmmss')
+$seed = [int64]$utcNow.ToString('yyyyMMddHHmmss')
 
 $focusChoices = @(
     'Literature review synthesis'
