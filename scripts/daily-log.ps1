@@ -4,7 +4,7 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
-$utcNow = Get-Date -AsUTC
+$utcNow = (Get-Date).ToUniversalTime()
 $day = $utcNow.ToString('yyyy-MM-dd')
 $filePath = Join-Path $repoRoot "daily/$day.md"
 
@@ -44,8 +44,7 @@ $nextItems = @(
     'Review related work to position findings better.'
 )
 
-function PickItem($array) {
-    param($array)
+function PickItem([object[]]$array) {
     return $array[$seed % $array.Count]
 }
 
