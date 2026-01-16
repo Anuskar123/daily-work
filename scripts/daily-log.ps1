@@ -6,16 +6,12 @@ Set-Location $repoRoot
 
 $utcNow = (Get-Date).ToUniversalTime()
 $day = $utcNow.ToString('yyyy-MM-dd')
-$filePath = Join-Path $repoRoot "daily/$day.md"
+$timestamp = $utcNow.ToString('HHmmss')
+$filePath = Join-Path $repoRoot "daily/${day}-${timestamp}.md"
 
 New-Item -ItemType Directory -Path (Split-Path $filePath -Parent) -Force | Out-Null
 
-if (Test-Path $filePath) {
-    Write-Host "Entry already exists for $day; nothing to do." -ForegroundColor Yellow
-    exit 0
-}
-
-$seed = [int]$utcNow.ToString('yyyyMMdd')
+$seed = [int]$utcNow.ToString('yyyyMMddHHmmss')
 
 $focusChoices = @(
     'Literature review synthesis'
@@ -53,7 +49,7 @@ $progress1 = PickItem $progressItems
 $progress2 = PickItem $nextItems
 
 $content = @"
-# Progress Log — $day
+# Progress Log — $day $timestamp UTC
 
 ## Focus
 - $focus
@@ -81,7 +77,7 @@ if ($LASTEXITCODE -eq 0) {
     exit 0
 }
 
-$commitMsg = "docs: log $day progress"
+$commitMsg = "docs: log $day-$timestamp progress"
 $gitCommit = git commit -m $commitMsg 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Error "git commit failed: $gitCommit"
