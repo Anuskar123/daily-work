@@ -84,6 +84,12 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
+$gitPull = git pull --rebase origin main 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "git pull --rebase failed: $gitPull"
+    exit $LASTEXITCODE
+}
+
 $gitPush = git push origin HEAD:main 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Error "git push failed: $gitPush"
