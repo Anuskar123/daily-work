@@ -1,6 +1,9 @@
 # Generates a daily project log entry, commits, and pushes.
 # Run manually or via Task Scheduler.
 
+# Ensure Git is in the PATH
+$env:PATH += ";C:\Program Files\Git\cmd"
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
